@@ -1,31 +1,35 @@
-
-from data_crawler import *
-from model import *
-import json
+from flask import Flask,request,jsonify,render_template,url_for,redirect
+import sys
 import requests
 
-
-def url_to_data(url):
-	df=scrape(url)
-	return df
+app = Flask(__name__)
 
 
-def data_to_prediction(df):
-	responses=predict(df)
-	return responses
+@app.route('/')
+def homepage():
+    return render_template("index.html",url="")
+#Trained Model Object
+ # model = pickle.load(open('pickle/model_v1.pk','rb'))
+@app.route('/result',methods=["GET","POST"])
+def result():
+    try:
+        if request.method =="POST":
+            #url given by user
+            url=request.form["query"]
+            url="https://robohash.org/"+url
 
-df_test=url_to_data(url)####Takes url and gives dataframe to be tested
-header = {'Content-Type': 'application/json', \
-                  'Accept': 'application/json'}
+            print(url)
+            #scraping data from url
+            #data_frame=d
+             # return data_frame.to_json(orient="records")
+            return render_template("index.html",url=url)
+        else:
+            return ("NOT Working")
+    except Exception as e:
+        return(str(e))
 
 
-"""Converting Pandas Dataframe to json
-"""
-data_test = df_test.to_json(orient='records')####converting test data to json
-data= requests.post("http://0.0.0.0:8000/predict", \
-                    data = json.dumps(data_test),\
-                    headers= header)#####sending test data to api call in reddit_app
-resp=data_to_prediction(data)
 
-print(resp.status_code)
-print(resp.json())
+
+if __name__ == "__main__":
+    app.run()
